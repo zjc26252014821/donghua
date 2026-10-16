@@ -9,7 +9,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = SthenoAddon
 SthenoAddon_FILES = SthenoAddon.m
-SthenoAddon_CFLAGS = -fobjc-arc
+SthenoAddon_CFLAGS = -fobjc-arc -Wno-deprecated-declarations
 SthenoAddon_FRAMEWORKS = UIKit Foundation
 SthenoAddon_LIBRARIES = substrate
 

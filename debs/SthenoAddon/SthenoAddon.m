@@ -286,9 +286,24 @@ static BOOL SCReadBool(NSString *key, BOOL def) {
     }
 }
 
+static UIWindow *SHPickKeyWindow(void) {
+    UIApplication *app = UIApplication.sharedApplication;
+    if (@available(iOS 13.0, *)) {
+        for (UIScene *scene in app.connectedScenes) {
+            if (scene.activationState != UISceneActivationStateForegroundActive) continue;
+            UIWindowScene *ws = (UIWindowScene *)scene;
+            if (![ws isKindOfClass:[UIWindowScene class]]) continue;
+            for (UIWindow *w in ws.windows) {
+                if (w.isKeyWindow) return w;
+            }
+        }
+    }
+    return app.keyWindow;
+}
+
 - (void)_presentAt:(CGPoint)loc {
     if (_presented) return;
-    UIWindow *host = UIApplication.sharedApplication.keyWindow;
+    UIWindow *host = SHPickKeyWindow();
     if (!host) return;
     SHRingWindow *ring = [[SHRingWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
     [host addSubview:ring];
@@ -338,7 +353,7 @@ static void hook_SBIconController_viewDidLoad(id self, SEL _cmd) {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)),
                    dispatch_get_main_queue(), ^{
         if (!SCReadBool(kSCKeyGestures, YES)) return;
-        UIWindow *key = UIApplication.sharedApplication.keyWindow;
+        UIWindow *key = SHPickKeyWindow();
         if (!key) return;
         static SHGestureHandler *handler = nil;
         if (!handler) handler = [[SHGestureHandler alloc] init];
