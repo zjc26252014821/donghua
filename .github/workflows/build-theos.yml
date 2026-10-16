@@ -68,7 +68,7 @@ jobs:
             cd "$GITHUB_WORKSPACE/$d"
             rm -rf .theos packages
             # rootless arm64
-            if make clean package >/tmp/log-arm64.txt 2>&1; then
+            if make package >/tmp/log-arm64.txt 2>&1; then
               cp packages/*.deb /tmp/artifacts/ 2>/dev/null || true
               echo "arm64 OK: $name"
             else
@@ -78,7 +78,7 @@ jobs:
             fi
             rm -rf .theos packages
             # roothide arm64e
-            if make clean package THEOS_PACKAGE_SCHEME=roothide >/tmp/log-arm64e.txt 2>&1; then
+            if make package THEOS_PACKAGE_SCHEME=roothide >/tmp/log-arm64e.txt 2>&1; then
               cp packages/*.deb /tmp/artifacts/ 2>/dev/null || true
               echo "arm64e OK: $name"
             else
