@@ -1,10 +1,11 @@
 Package: com.susudear.sthenoaddon
 Name: Stheno 附加 (screencore)
 Depends: mobilesubstrate, preferenceloader
-Version: 1.0.1
-Architecture: iphoneos-arm64
 Description: stheno 式边缘上滑环形切换器 + 弹簧动画, 叠加在 screencore 分屏之上。
  读取 com.susudear.screencoreprefs 的 sthenoAnimationsEnabled / sthenoGesturesEnabled 开关。
 Maintainer: zjccrh-arch
 Author: zjccrh-arch
 Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.1-1+debug
+Installed-Size: 236
