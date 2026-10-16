@@ -1,0 +1,7 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/runner/work/donghua/donghua/debs/SthenoAddon/.theos/obj/debug/arm64/SthenoPreference.bundle/SthenoPreference'
+relocations:
+  - { offsetInCU: 0x1E, offset: 0x1E, size: 0x8, addend: 0x0, symName: '-[SthenoPreferenceListController init]', symObjAddr: 0x0, symBinAddr: 0x4000, symSize: 0xB8 }
+  - { offsetInCU: 0x106D, offset: 0x106D, size: 0x8, addend: 0x0, symName: '-[SthenoPreferenceListController init]', symObjAddr: 0x0, symBinAddr: 0x4000, symSize: 0xB8 }
+...
