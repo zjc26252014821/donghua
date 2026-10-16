@@ -1,0 +1,131 @@
+name: Build Theos Projects
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'debs/**' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    permissions:
+      contents: write
+    concurrency:
+      group: theos-build
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Theos (roothide)
+        run: |
+          sudo mkdir -p /opt/theos
+          sudo chown -R $USER /opt/theos
+          git clone --recursive --depth 1 https://github.com/roothide/theos.git /opt/theos
+
+      - name: Install iPhoneOS 16.5 SDK
+        run: |
+          cd /opt/theos
+          export THEOS=/opt/theos
+          bin/install-sdk iPhoneOS16.5
+
+      - name: Build all projects (rootless arm64 + roothide arm64e)
+        id: build
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -e
+          export THEOS=/opt/theos
+          cd "$GITHUB_WORKSPACE"
+          ERR="$GITHUB_WORKSPACE/build-errors.txt"
+          : > "$ERR"
+          mkdir -p /tmp/artifacts
+          FAILED=0
+          for d in debs/*/; do
+            [ -d "$d" ] || continue
+            name="$(basename "$d")"
+            [ "$name" = ".gitkeep" ] && continue
+            echo "=== Building $name ==="
+            cd "$GITHUB_WORKSPACE/$d"
+            rm -rf .theos packages
+            # rootless arm64
+            if make clean package >/tmp/log-arm64.txt 2>&1; then
+              cp packages/*.deb /tmp/artifacts/ 2>/dev/null || true
+              echo "arm64 OK: $name"
+            else
+              echo "arm64 FAIL: $name" | tee -a "$ERR"
+              tail -30 /tmp/log-arm64.txt >> "$ERR" || true
+              FAILED=1
+            fi
+            rm -rf .theos packages
+            # roothide arm64e
+            if make clean package THEOS_PACKAGE_SCHEME=roothide >/tmp/log-arm64e.txt 2>&1; then
+              cp packages/*.deb /tmp/artifacts/ 2>/dev/null || true
+              echo "arm64e OK: $name"
+            else
+              echo "arm64e FAIL: $name" | tee -a "$ERR"
+              tail -30 /tmp/log-arm64e.txt >> "$ERR" || true
+              FAILED=1
+            fi
+          done
+          if [ "$FAILED" = "1" ]; then
+            echo "::set-output name=failed::true"
+            exit 2
+          fi
+          # 收集产物
+          mkdir -p "$GITHUB_WORKSPACE/packages"
+          cp /tmp/artifacts/*.deb "$GITHUB_WORKSPACE/packages/" 2>/dev/null || true
+
+      - name: Publish packages
+        if: steps.build.outputs.failed != 'true'
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          if ls packages/*.deb >/dev/null 2>&1; then
+            git config user.name "theos-bot"
+            git config user.email "theos-bot@users.noreply.github.com"
+            git add packages/*.deb
+            git commit -m "自动构建 deb 包 (run ${{ github.run_id }}): $(basename packages/*.deb | tr '\n' ' ')" \
+              -m "由 Build Theos Projects 工作流生成。" || echo "无新 deb 可提交"
+            git push origin main || { git pull --rebase origin main && git push origin main; }
+          fi
+
+      - name: Clean source dirs
+        if: steps.build.outputs.failed != 'true'
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "theos-bot"
+          git config user.email "theos-bot@users.noreply.github.com"
+          for d in debs/*/; do
+            [ -d "$d" ] || continue
+            name="$(basename "$d")"
+            [ "$name" = ".gitkeep" ] && continue
+            git rm -r --quiet "$d"
+            mkdir -p "debs/$name"
+            touch "debs/$name/.gitkeep"
+          done
+          git add debs/
+          git commit -m "编译完成，清除源码" || true
+          git push origin main || { git pull --rebase origin main && git push origin main; }
+
+      - name: Upload build logs on failure
+        if: failure() || steps.build.outputs.failed == 'true'
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          RUN_ID="${{ github.run_id }}"
+          git config user.name "theos-bot"
+          git config user.email "theos-bot@users.noreply.github.com"
+          if git ls-remote --exit-code origin build-logs >/dev/null 2>&1; then
+            git fetch origin build-logs
+            git checkout build-logs 2>/dev/null || git checkout -b build-logs origin/build-logs
+          else
+            git checkout -b build-logs
+          fi
+          mkdir -p errors
+          cp build-errors.txt "errors/build-run-${RUN_ID}.txt" 2>/dev/null || true
+          git add errors/
+          git commit -m "build errors run ${RUN_ID}" || true
+          git push origin build-logs || { git pull --rebase origin build-logs && git push origin build-logs; }
