@@ -99,14 +99,19 @@ jobs:
         if: steps.build.outputs.failed != 'true'
         run: |
           cd "$GITHUB_WORKSPACE"
-          if ls packages/*.deb >/dev/null 2>&1; then
-            git config user.name "theos-bot"
-            git config user.email "theos-bot@users.noreply.github.com"
-            git add packages/*.deb
-            git commit -m "自动构建 deb 包 (run ${{ github.run_id }}): $(basename packages/*.deb | tr '\n' ' ')" \
-              -m "由 Build Theos Projects 工作流生成。" || echo "无新 deb 可提交"
-            git push origin main || { git pull --rebase origin main && git push origin main; }
-          fi
+          git config user.name "theos-bot"
+          git config user.email "theos-bot@users.noreply.github.com"
+          # The build leaves untracked .theos/packages files; remove them before
+          # syncing, otherwise binary deb files conflict during rebase.
+          find debs -type d \( -name .theos -o -name packages \) -prune -exec rm -rf {} +
+          git fetch origin main
+          git reset --hard origin/main
+          mkdir -p packages
+          cp /tmp/artifacts/*.deb packages/
+          git add -f packages/*.deb
+          git commit -m "自动构建 deb 包 (run ${{ github.run_id }})" \
+            -m "由 Build Theos Projects 工作流生成。"
+          git push origin main
 
       - name: Clean build leftovers
         if: steps.build.outputs.failed != 'true'
