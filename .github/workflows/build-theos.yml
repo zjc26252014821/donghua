@@ -108,6 +108,13 @@ jobs:
             git push origin main || { git pull --rebase origin main && git push origin main; }
           fi
 
+      - name: Clean build leftovers
+        if: steps.build.outputs.failed != 'true'
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          find debs -type d \( -name .theos -o -name packages \) -prune -exec rm -rf {} +
+          find debs -type f \( -name '*.deb' -o -name '*.dSYM' \) -delete
+
       - name: Clean source dirs
         if: steps.build.outputs.failed != 'true'
         run: |

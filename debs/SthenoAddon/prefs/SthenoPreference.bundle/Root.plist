@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>title</key>
+    <string>Stheno 附加</string>
+    <key>items</key>
+    <array>
+        <dict>
+            <key>cell</key>
+            <string>PSGroupCell</string>
+            <key>label</key>
+            <string>Stheno 附加 (screencore)</string>
+            <key>footerText</key>
+            <string>边缘上滑呼出环形应用切换器；弹簧动画应用于切换过渡。</string>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSSwitchCell</string>
+            <key>defaults</key>
+            <string>com.susudear.screencoreprefs</string>
+            <key>key</key>
+            <string>sthenoAnimationsEnabled</string>
+            <key>label</key>
+            <string>使用 stheno 弹簧动画</string>
+            <key>default</key>
+            <true/>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSSwitchCell</string>
+            <key>defaults</key>
+            <string>com.susudear.screencoreprefs</string>
+            <key>key</key>
+            <string>sthenoGesturesEnabled</string>
+            <key>label</key>
+            <string>使用 stheno 手势 (边缘上滑)</string>
+            <key>default</key>
+            <true/>
+        </dict>
+    </array>
+</dict>
+</plist>
