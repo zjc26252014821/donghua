@@ -40,7 +40,13 @@ jobs:
         run: |
           cd /opt/theos
           export THEOS=/opt/theos
-          bin/install-sdk iPhoneOS16.5
+          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          for attempt in 1 2 3; do
+            if bin/install-sdk iPhoneOS16.5; then exit 0; fi
+            echo "install-sdk attempt $attempt failed, retrying..."
+            sleep 15
+          done
+          exit 1
 
       - name: Build all projects (rootless arm64 + roothide arm64e)
         id: build
