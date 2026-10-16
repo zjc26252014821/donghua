@@ -4,19 +4,19 @@
 <dict>
     <key>CFBundleDisplayName</key>
     <string>Stheno 附加</string>
+    <key>CFBundleExecutable</key>
+    <string>SthenoPreference</string>
     <key>CFBundleIdentifier</key>
     <string>com.susudear.sthenoaddon.prefs</string>
     <key>CFBundleName</key>
-    <string>SthenoAddonPrefs</string>
+    <string>SthenoPreference</string>
     <key>CFBundlePackageType</key>
     <string>BNDL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>1.0.1</string>
     <key>CFBundleVersion</key>
-    <string>1.0</string>
+    <string>1.0.1</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
-    <key>PreferenceLoaderIdentifier</key>
-    <string>com.susudear.sthenoaddon</string>
 </dict>
 </plist>

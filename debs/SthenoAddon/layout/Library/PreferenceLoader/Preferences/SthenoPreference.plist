@@ -8,10 +8,12 @@
         <string>PSLinkCell</string>
         <key>bundle</key>
         <string>SthenoPreference</string>
+        <key>detail</key>
+        <string>SthenoPreferenceListController</string>
+        <key>isController</key>
+        <true/>
         <key>label</key>
         <string>Stheno 附加</string>
-        <key>isController</key>
-        <false/>
     </dict>
 </dict>
 </plist>
